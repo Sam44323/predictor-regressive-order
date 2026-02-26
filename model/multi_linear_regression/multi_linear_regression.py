@@ -143,8 +143,8 @@ def main():
     plt.plot([min_val, max_val], [min_val, max_val],
              color='red', linestyle='--', label='Perfect fit (y = ŷ)')
 
-    plt.xlabel('Actual Price ($1000s)')
-    plt.ylabel('Predicted Price ($1000s)')
+    plt.xlabel('Actual ($1000s)')
+    plt.ylabel('Predicted ($1000s)')
     plt.title('Predicted vs Actual (should align with red line)')
     plt.legend()
 
