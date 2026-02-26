@@ -63,8 +63,6 @@ def gradient_descent(X, y, w, b, learning_rate, iterations):
 
     for i in range(iterations):
         
-        
-
         # Compute gradients to find how to adjust w and b to reduce error
         dw, db = compute_gradients(X, y, w, b)
 
