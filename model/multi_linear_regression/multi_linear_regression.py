@@ -1,86 +1,147 @@
+
 # MULTI-VARIABLE LINEAR REGRESSION TRAINING IMPLEMENTATION
+
 
 """
 This module implements the training of a multi-variable linear regression model
 using gradient descent. Fixes applied:
-  1. Feature normalization (z-score) for proper convergence
-  2. m derived locally inside functions (no global dependency)
-  3. Safe parameter updates (no in-place mutation)
-  4. Increased iterations and adjusted learning rate for full convergence
-  5. Proper straight-line plot of predictions vs actuals
+    1. Feature normalization (z-score) for proper convergence
+    2. m derived locally inside functions (no g-dependency)
+    3. Safe parameter updates (no in-place mutation)
+    4. Increased iterations and adjusted learning rate for full convergence
+    5. Proper straight-line plot of predictions vs actuals
 """
 
+
+# Import numpy for numerical operations
 import numpy as np
+# Import matplotlib for plotting
 import matplotlib.pyplot as plt
 
-# Dataset with multiple features
+
+# Dataset with multiple-features
 # Features: size (in 1000 sq ft) and number of bedrooms
-X = np.array([[0.8, 2],
-              [1.0, 3],
-              [1.2, 3],
-              [1.5, 4],
-              [1.8, 4]])
+X = np.array([
+    [0.8, 2],   # 0.8 (1000 sq ft), 2 bedrooms
+    [0.8, 2],   # 0.8 (1000 sq ft), 2 bedrooms
+    [1.0, 3],   # 1.0 (1000 sq ft), 3 bedrooms
+    [1.2, 3],   # 1.2 (1000 sq ft), 3 bedrooms
+    [1.4, 3],   # 1.2 (1000 sq ft), 3 bedrooms
+    [1.5, 4],   # 1.5 (1000 sq ft), 4 bedrooms
+    [1.8, 4]    # 1.8 (1000 sq ft), 4 bedrooms
+])
+
 
 # Prices (in $1000s)
-y = np.array([150, 200, 240, 300, 360])
+y = np.array([
+    150,  # Price for first house
+    150,  # Price for first house
+    200,  # Price for second house
+    230,  # Price for second house
+    240,  # Price for third house
+    300,  # Price for fourth house
+    360   # Price for fifth house
+])
 
-m, n = X.shape  # number of training examples and features
+
+# Get number of training examples (m) and features (n)
+m, n = X.shape  # m = 5, n = 2
+
 
 # --- Feature Normalization (z-score) ---
+# axis = 0 means along the column and 1 means along the row
+# Compute mean of each feature (column-wise)
 X_mean = X.mean(axis=0)
+# Compute standard deviation of each feature (column-wise)
 X_std  = X.std(axis=0)
+# Normalize the features using z-score normalization
 X_norm = (X - X_mean) / X_std
 
 
+
+# Predict the function for linear regression
 def predict(X, w, b):
     """
     Linear model:
     f(x) = w1*x1 + w2*x2 + ... + wn*xn + b
+    X: input features (m, n)
+    w: weights (n,)
+    b: bias (scalar)
+    Returns: predictions (m,)
     """
+    # Compute dot product of X and w, then add bias b
     return X.dot(w) + b
 
 
+
+# Compute mean squared error cost
 def compute_cost(X, y, w, b):
     """
     J(w,b) = (1/2m) * sum((prediction - y)^2)
+    X: input features
+    y: target values
+    w: weights
+    b: bias
+    Returns: cost (scalar)
     """
-    m_local = X.shape[0] # total no. of samples
-    predictions = predict(X, w, b)
+    m_local = X.shape[0]  # Number of samples
+    predictions = predict(X, w, b)  # Model predictions
+    # Compute mean squared error cost
     cost = (1 / (2 * m_local)) * np.sum((predictions - y) ** 2)
     return cost
 
 
+
+# Compute gradients for weights and bias
 def compute_gradients(X, y, w, b):
     """
     Computes gradients dJ/dw and dJ/db.
+    X: input features
+    y: target values
+    w: weights
+    b: bias
+    Returns: dw (gradient for weights), db (gradient for bias)
     """
-    m_local = X.shape[0] # total no. of samples
-    predictions = predict(X, w, b)
-    errors = predictions - y
+    m_local = X.shape[0]  # Number of samples
+    predictions = predict(X, w, b)  # Model predictions
+    errors = predictions - y        # Prediction errors
 
+    # Gradient for weights: shape (n,)
     dw = (1 / m_local) * X.T.dot(errors)
+    # Gradient for bias: scalar
     db = (1 / m_local) * np.sum(errors)
 
     return dw, db
 
 
+
+# Perform gradient descent optimization
 def gradient_descent(X, y, w, b, learning_rate, iterations):
     """
     Performs gradient descent to learn w and b.
-    Uses safe (non in-place) parameter updates.
+    X: input features
+    y: target values
+    w: initial weights
+    b: initial bias
+    learning_rate: step size
+    iterations: number of iterations
+    Returns: learned weights, bias, and cost history
     """
-    cost_history = []
+    cost_history = []  # To store cost at each iteration
 
     for i in range(iterations):
+        # Compute gradients for current parameters
         dw, db = compute_gradients(X, y, w, b)
 
-        # Safe update — avoids in-place mutation bugs
+        # Update weights and bias (safe, not in-place)
         w = w - learning_rate * dw
         b = b - learning_rate * db
 
+        # Compute and record cost
         cost = compute_cost(X, y, w, b)
         cost_history.append(cost)
 
+        # Print cost every 1000 iterations
         if i % 1000 == 0:
             print(f"Iteration {i}: Cost = {cost:.4f}")
 
@@ -88,8 +149,8 @@ def gradient_descent(X, y, w, b, learning_rate, iterations):
 
 
 def main():
-    learning_rate = 0.1   # higher LR works well after normalization
-    iterations    = 10000  # enough iterations for full convergence
+    learning_rate = 0.1   # higher LR works well post the normalization
+    iterations    = 10000  # enough iterations for full-convergence
 
     # Initial parameters
     w = np.zeros(n)
@@ -110,6 +171,7 @@ def main():
     # Normalize test data using TRAINING mean and std (important!)
     X_test_norm = (X_test - X_mean) / X_std
 
+    # Forward-propagation
     y_pred = predict(X_test_norm, w, b)
     print("\nTest Data Predictions:")
     for i, (actual, pred) in enumerate(zip(y_test, y_pred)):
@@ -118,7 +180,7 @@ def main():
     test_cost = compute_cost(X_test_norm, y_test, w, b)
     print(f"\nTest set cost (MSE): {test_cost:.4f}")
 
-    # --- Plot 1: Cost history (should show smooth decay curve) ---
+    # --- Plot-1: Cost history (should show smooth decay curve) ---
     plt.figure(figsize=(12, 5))
 
     plt.subplot(1, 2, 1)
@@ -127,7 +189,7 @@ def main():
     plt.ylabel('Cost')
     plt.title('Cost Function History')
 
-    # --- Plot 2: Predicted vs Actual (should be a straight line) ---
+    # --- Plot-2: Predicted vs Actual (should be a straight line) ---
     y_train_pred = predict(X_norm, w, b)
 
     plt.subplot(1, 2, 2)
