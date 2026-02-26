@@ -84,9 +84,8 @@ def gradient_descent(X, y, w, b, learning_rate, iterations):
 # main-function
 
 def main():
-    # Hyperparameters
-    learning_rate = 0.01
-    iterations = 1000
+    learning_rate = 0.01 # alpha
+    iterations = 1000 # training-iterations
 
     # Initial parameters
     w = 0.0
