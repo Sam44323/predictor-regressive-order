@@ -1,5 +1,13 @@
 # SINGLE-VARIABLE LINEAR REGRESSION TRAINING IMPLEMENTATION
 
+"""
+This model trains to find the best values for w (weight) and b (bias)
+so that the linear equation f(x) = wx + b fits the training data as closely as possible.
+After training, these learned parameters are used in the predict function
+to make accurate predictions on new, unseen data.
+The entire training process is focused on tuning w and b for optimal prediction.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -73,14 +81,6 @@ def gradient_descent(X, y, w, b, learning_rate, iterations):
 
     return w, b, cost_history
 
-
-"""
-This model trains to find the best values for w (weight) and b (bias)
-so that the linear equation f(x) = wx + b fits the training data as closely as possible.
-After training, these learned parameters are used in the predict function
-to make accurate predictions on new, unseen data.
-The entire training process is focused on tuning w and b for optimal prediction.
-"""
 # main-function
 
 def main():
@@ -93,12 +93,29 @@ def main():
     b = 0.0
 
     # Train the model using gradient descent
-    w, b, cost_history = gradient_descent(X, y, w, b, learning_rate, iterations)
+    w, b, _ = gradient_descent(X, y, w, b, learning_rate, iterations)
+
 
     print(f"Trained parameters: w = {w:.2f}, b = {b:.2f}")
 
-    # Plot cost history
-    plt.scatter(X, y, label="Actual-prices")
+    # --- Benchmarking on fresh test data ---
+    # Example fresh data (new house sizes and their actual prices)
+    X_test = np.array([1.1, 1.4, 1.7])
+    y_test = np.array([220, 280, 340])
+
+    # Predict using trained model
+    y_pred = predict(X_test, w, b)
+    print("\nTest Data Predictions:")
+    for x, actual, pred in zip(X_test, y_test, y_pred):
+        print(f"Size: {x}k sq ft | Actual: ${actual}k | Predicted: ${pred:.2f}k")
+
+    # Benchmark: Compute test cost (mean squared error)
+    test_cost = compute_cost(X_test, y_test, w, b)
+    print(f"Test set cost (MSE): {test_cost:.2f}")
+
+    # Plot cost history and regression line
+    plt.scatter(X, y, label="Training Data")
+    plt.scatter(X_test, y_test, marker='x', color='red', label="Test Data")
     plt.plot(X, predict(X, w, b), label="Regression Line")
     plt.legend()
     plt.show()
